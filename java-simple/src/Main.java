@@ -12,7 +12,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 public class Main {
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
-        String fileName = "C:/Users/Luis Carlos/Documents/test.txt";
+        String fileName = "./resources/test.txt";
         InputStream input = new FileInputStream(fileName);
         ANTLRInputStream stream = new ANTLRInputStream(input);
         //Lexico
