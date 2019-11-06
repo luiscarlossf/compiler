@@ -1,4 +1,4 @@
-program exemplo{ 
+program exemplo { 
 	int: numero; 
 	func int fatorial (int: fat){ 
 		if (fat > 1){

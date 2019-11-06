@@ -1,6 +1,6 @@
 
 grammar JavaSimple;
-r : PROGRAM ; //NÃO ENTENDI PRA QUE SERVE ISSO!!!!!!!!!!!!
+r : 'Hello'; //NÃO ENTENDI PRA QUE SERVE ISSO!!!!!!!!!!!!
 
 fragment
 Letra : [a-z]+;
