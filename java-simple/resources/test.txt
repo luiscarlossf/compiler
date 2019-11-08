@@ -1,5 +1,11 @@
 program exemplo { 
-	int: numero; 
+    /*
+    	Programa de teste do compilador
+    	Implementado por Luis Carlos e Mateus Tito
+    */
+	int: numero;
+	numero = "Luis Carlos!";
+	numero = "\"Luis Carlos!\""; // Testando string com aspas 
 	func int fatorial (int: fat){ 
 		if (fat > 1){
 			return (fat * fatorial(fat - 1));
