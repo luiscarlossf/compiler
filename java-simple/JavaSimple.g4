@@ -10,8 +10,10 @@ Digito: [0-9];
 
 fragment
 Inteiro: Digito+;
+
 fragment
 Float: Digito+ '.' Digito* | '.' Digito+;
+
 fragment
 ESC: '\\' [btnr"\\]; // \b, \t, \n, etc...
 

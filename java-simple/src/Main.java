@@ -21,9 +21,8 @@ public class Main {
         //Sintatico
         JavaSimpleParser parser = new JavaSimpleParser(tokens);
         ParseTree tree = parser.r();
-        System.out.println("\n"+ tokens.getTokens());
+        System.out.println();
         System.out.println(tree.toStringTree(parser));
-        System.out.println("end of program");
     }
 
 }
