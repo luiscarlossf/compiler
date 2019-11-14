@@ -1,6 +1,10 @@
-
 grammar JavaSimple;
-r : .*?;
+r : PROGRAM ID '{' decl? '}';
+decl: variable decl? | constant decl?;
+variable : type ':' ids;
+constant : CONST type ID '=' NUMBER ';';
+ids: ID (',' ID)* ';';
+type: TYPE;
 
 fragment
 Letra : [a-z]+;
