@@ -6,15 +6,23 @@ program exemplo {
 	int: numero;
 	float: num1, num2;
 	const int max = 100;
-	/*
-	numero = "Luis Carlos!";
-	numero = "\"Luis Carlos!\""; // Testando string com aspas 
+	
 	func int fatorial (int: fat){ 
 		if (fat > 1){
-			return (fat * fatorial(fat - 1));
+			return (0);//fat * fatorial(fat - 1));
 		}else{
 			return (1);
 		}
 	}
-	*/
+	
+	func boolean resultato (int: valor){
+	    print ("Resultado: ", valor);
+	    return (TRUE);
+	}
+	
+	block{
+	    print ("Fatorial de N. Digite o número?");
+	    read (numero);
+	    resultado (fatorial(numero));
+	}
 }
