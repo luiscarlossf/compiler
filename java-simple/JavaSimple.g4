@@ -1,10 +1,54 @@
 grammar JavaSimple;
-r : PROGRAM ID '{' decl? '}';
-decl: variable decl? | constant decl?;
-variable : type ':' ids;
-constant : CONST type ID '=' NUMBER ';';
-ids: ID (',' ID)* ';';
+r : PROGRAM ID '{' stmt? func_stmt block_stmt '}';
+//Declaração de variáveis e constantes
+stmt: vars ';' stmt? 
+	| constant ';' stmt?;
+vars : type ':' ID (',' ID)*;
+constant : CONST type ID '=' NUMBER ;
 type: TYPE;
+
+//Declaração de funções
+func_stmt: ('func' type ID '(' params? ')' '{' block '}')*;
+params: param (',' param)*;
+param: type ':' ID;
+
+rtn_stmt:'return' '(' (expr| '') ')';
+ 
+//Block
+block_stmt: 'block' '{' block '}';
+block: (builtin_stmt ';' | assign ';' | if_stmt | for_stmt | expr ';' | rtn_stmt ';')*;
+
+//Funções nativas
+builtin_stmt: PRINT '(' expr_list ')' 
+	| READ  '(' var_list ')';
+	
+expr_list: expr (',' expr)*;
+var_list: ID (',' ID)*;
+
+//Comando de atribuição
+assign:  ID '=' expr ;
+
+//Expressões
+expr: 
+	| '!' expr
+	| '-' expr
+	| ('++'|'--') expr
+	| expr ('*' | '/') expr
+	| expr ('+' | '-') expr
+	| expr ('==' | '!=') expr
+	| expr ('>='|'<='|'>'|'<') expr
+	| '('expr')'
+	| ID '(' (expr_list| '') ')'
+	| (ID | NUMBER | STRING | BOOLEAN);
+
+if_stmt: IF '(' expr ')''{' block '}'( ELSE '{' block '}')?;
+	
+	
+
+for_stmt: FOR '('(assign (',' assign)*)? ';' expr ';' (assign (',' assign)*)? ')''{' for_block '}';
+for_block: block
+         | 'break'';';
+
 
 fragment
 Letra : [a-z]+;
@@ -54,6 +98,7 @@ PONTOVIRGULA: ';'{System.out.print(" ; ");};
 
 
 //Operadores
+/*
  NEG: '!' {System.out.print(" NEG ");};
  LESS: '-' {System.out.print(" LESS ");};
  PLUS: '+' {System.out.print(" PLUS ");};
@@ -63,7 +108,7 @@ PONTOVIRGULA: ';'{System.out.print(" ; ");};
  INC: '++' {System.out.print(" INC ");};
  DEC: '--' {System.out.print(" DEC ");};
  RELOP: ('=='|'!='|'>='|'<='|'>'|'<') {System.out.print(" RELOP ");};
- 
+*/ 
  
 //Identificadores
  ID : Letra (Letra|Inteiro)* {System.out.print(" ID ");}; 
