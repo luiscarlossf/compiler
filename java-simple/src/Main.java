@@ -3,7 +3,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-
+import symboltable.*;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 

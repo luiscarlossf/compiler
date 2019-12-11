@@ -1,16 +1,45 @@
 grammar JavaSimple;
-r : PROGRAM ID '{' stmt? func_stmt block_stmt '}';
+@header{
+	import symboltable.*;
+	import java.util.HashMap;
+	import java.util.Map;
+	
+}
+@parser::members{
+	SymbolTable symtab = new SymbolTable();
+	Map <String, MethodSymbol> functables = new HashMap <String, MethodSymbol>();
+	int temp = 0;
+	int label = 0;
+}
+
+r @after{System.out.println(symtab);}: PROGRAM ID '{' stmt? func_stmt block_stmt '}';
 //Declaração de variáveis e constantes
-stmt: vars ';' stmt? 
+stmt : vars ';' stmt? 
 	| constant ';' stmt?;
-vars : type ':' ID (',' ID)*;
-constant : CONST type ID '=' NUMBER ;
-type: TYPE;
+vars : type ':' ID (',' ID)* {
+        System.out.println("line "+$ID.getLine()+": def "+$ID.text);
+    	VariableSymbol vs = new VariableSymbol($ID.text,$type.tsym);
+    	symtab.define(vs);
+};
+constant : CONST type ID '=' NUMBER {};
+type returns [Type tsym]
+    :   'float' {$tsym = (Type)symtab.resolve("float");}
+    |   'int'   {$tsym = (Type)symtab.resolve("int");}
+    |   'string' {$tsym = (Type)symtab.resolve("string");}
+    |   'boolean' {$tsym = (Type)symtab.resolve("boolean");}
+    ;
 
 //Declaração de funções
-func_stmt: ('func' type ID '(' params? ')' '{' block '}')*;
-params: param (',' param)*;
-param: type ':' ID;
+func_stmt @init { MethodSymbol f = new MethodSymbol();} 
+         @after{System.out.println(functables);}
+    : ('func' a=type ID {
+    	f = new MethodSymbol($ID.text, $a.tsym, (Scope) symtab);
+    	functables.put($ID.text, f); 
+      } '(' (type ':' ID (',' type ':' ID)*)? ')' '{' block '}')*{
+	VariableSymbol vs = new VariableSymbol($ID.text,$type.tsym);
+	f.define(vs);
+};
+//params: type ':' ID (',' type ':' ID)*;
 
 rtn_stmt:'return' '(' (expr| '') ')';
  
@@ -26,22 +55,80 @@ expr_list: expr (',' expr)*;
 var_list: ID (',' ID)*;
 
 //Comando de atribuição
-assign:  ID '=' expr ;
+assign returns [String code, String place]:  ID '=' expr {
+		$place = $ID.text;
+		$code = $expr.code + $place "=" $expr.place;
+	};
 
 //Expressões
-expr: 
-	| '!' expr
-	| '-' expr
-	| ('++'|'--') expr
-	| expr ('*' | '/') expr
-	| expr ('+' | '-') expr
-	| expr ('==' | '!=') expr
-	| expr ('>='|'<='|'>'|'<') expr
-	| '('expr')'
+expr returns [String code, String place]: 
+	| op='!' e1=expr{
+		$place = "_t"+temp;
+		temp++;
+		$code = $e1.code + $e2.code + $place "="  op + $e1.place;
+	}
+	| op='-' e1=expr{
+		$place = "_t"+temp;
+		temp++;
+		$code = $e1.code + $e2.code + $place "="  op + $e1.place;
+	}
+	| op=('++'|'--') e1=expr{
+		$place = "_t"+temp;
+		temp++;
+		$code = $e1.code + $e2.code + $place "="  op + $e1.place;
+	}
+	| e1=expr op=('*' | '/') e2=expr{
+		$place = "_t"+temp;
+		temp++;
+		$code = $e1.code + $e2.code + $place "=" $e1.place + op + $e2.place;
+	}
+	| e1=expr op=('+' | '-') e2=expr {
+		$place = "_t"+temp;
+		temp++;
+		$code = $e1.code + $e2.code + $place "=" $e1.place + op + $e2.place;
+	}
+	| e1=expr op=('==' | '!=') e2=expr {
+		$place = "_t"+temp;
+		temp++;
+		$code = $e1.code + $e2.code + $place "=" $e1.place + op + $e2.place;
+	}
+	| e1=expr relop=('>='|'<='|'>'|'<') e2=expr{
+		$place = "_t"+temp;
+		temp++;
+		$code = $e1.code + $e2.code + $place "=" $e1.place + relop + $e2.place;
+	}
 	| ID '(' (expr_list| '') ')'
-	| (ID | NUMBER | STRING | BOOLEAN);
+	| '('e1=expr')' {
+		$place = $e1.place;
+		$code = $e1.code;
+	}
+	| ID {
+		$place = $ID.text;
+		$code = "";
+	}
+	| NUMBER {
+		$place = $NUMBER.text;
+		$code = "";
+	}
+	| STRING {
+		$place = $STRING.text;
+		$code = "";
+	}
+	| BOOLEAN{
+		$place = $BOOLEAN.text;
+		$code = "";
+	};
 
-if_stmt: IF '(' expr ')''{' block '}'( ELSE '{' block '}')?;
+if_stmt returns [String code, String place]: IF '(' expr ')''{' b1=block '}'( ELSE '{' b2=block '}')?{
+	String lelse = ".l"+label;
+	label++;
+	String lend = ".l"+label;
+	label++;
+	$code = $expr.code + "\n\t" + 
+			"if(" + $expr.place + " == False): goto " + lelse + "\n\t"
+			+ $b1.code + "\n\tgoto " + lend + "\n\tlabel " + lelse + "\n\t"
+			+ $b2.code + "\n\tlabel " + lend;
+};
 	
 	
 
@@ -81,7 +168,7 @@ READ: 'read' {System.out.print(" READ ");};
 FOR: 'for' {System.out.print(" FOR ");};
 ASSIGN: '=' {System.out.print(" ASSIGN ");};
 CONST: 'const' {System.out.print(" CONST ");};
-TYPE: ('int'|'string'|'boolean'|'float') {System.out.print(" TYPE ");};
+//TYPE: ('int'|'string'|'boolean'|'float') {System.out.print(" TYPE ");};
 
 //Tipos
 STRING: '"' (ESC|.)*? '"'{System.out.print(" STRING ");}; 
